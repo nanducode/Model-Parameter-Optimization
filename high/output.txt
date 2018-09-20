@@ -79,8 +79,8 @@ MOM Day      10.000   2880: En 5.473945E-05, MaxCFL  0.00290, Mass 5.28649462783
 Tabulating mpp_clock statistics across      4 PEs...
 
                                           tmin          tmax          tavg          tstd  tfrac grain pemin pemax
-Total runtime                       166.079550    166.080326    166.079957      0.000370  1.000     0     0     3
-Initialization                        0.156198      0.163125      0.159406      0.003211  0.001     0     0     3
-Main loop                           165.784530    165.785834    165.785437      0.000527  0.998     0     0     3
-Termination                           0.124163      0.125797      0.125284      0.000653  0.001     0     0     3
+Total runtime                       166.574066    166.575255    166.574798      0.000497  1.000     0     0     3
+Initialization                        0.101573      0.105464      0.104490      0.001684  0.001     0     0     3
+Main loop                           166.270466    166.270596    166.270499      0.000056  0.998     0     0     3
+Termination                           0.193337      0.194694      0.193914      0.000494  0.001     0     0     3
  MPP_STACK high water mark=           0

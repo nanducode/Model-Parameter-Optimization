@@ -49,22 +49,23 @@ def collect_data_from_run(model_name):
     """Collects all data from a run"""
     run_dir_glob = MOM6DIR + "/ocean_only/" + model_name + "/*"
     for f in glob.glob(run_dir_glob):
+        file_name = path.basename(f)
         # MOM_parameter_doc.
-        if f.endswith(".short") or f.endswith(".all") or f.endswith(".layout"):
-            move_file(f, model_name)
+        if file_name.endswith(".short") or file_name.endswith(".all") or file_name.endswith(".layout"):
+            move_file(file_name, model_name)
         # logs of run
-        elif f.startswith("logfile"):
-            move_file(f, model_name)
-        elif f.startswith("available_diags"):
-            move_file(f, model_name)
-        elif f == "ocean.stats":
-            move_file(f, model_name)
+        elif file_name.startswith("logfile"):
+            move_file(file_name, model_name)
+        elif file_name.startswith("available_diags"):
+            move_file(file_name, model_name)
+        elif file_name == "ocean.stats":
+            move_file(file_name, model_name)
         # Diagnostic table
-        elif f == "diag_table":
-            move_file(f, model_name)
+        elif file_name == "diag_table":
+            move_file(file_name, model_name)
         # all netCDF data
-        elif f.endswith(".nc"):
-            move_file(f, model_name)
+        elif file_name.endswith(".nc"):
+            move_file(file_name, model_name)
 
 
 def run_MOM6_model(model_name):
