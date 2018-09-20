@@ -1,0 +1,86 @@
+NOTE from PE     0: MPP_DOMAINS_SET_STACK_SIZE: stack size set to    40000.
+&MPP_IO_NML
+ HEADER_BUFFER_VAL=      16384,
+ GLOBAL_FIELD_ON_ROOT_PE=T,
+ IO_CLOCKS_ON=F,
+ SHUFFLE=          0,
+ DEFLATE_LEVEL=         -1,
+ CF_COMPLIANCE=F,
+ /
+NOTE from PE     0: MPP_IO_SET_STACK_SIZE: stack size set to     131072.
+NOTE from PE     0: MPP_DOMAINS_SET_STACK_SIZE: stack size set to   552960.
+NOTE from PE     0: ======== Model being driven by MOM_driver ========
+NOTE from PE     0: callTree: o Program MOM_main, MOM_driver.F90
+NOTE from PE     0: open_param_file: MOM_input has been opened successfully.
+NOTE from PE     0: open_param_file: MOM_override has been opened successfully.
+
+WARNING from PE     0: MOM_file_parser : DT over-ridden.  Line: 'DT = 300' in file MOM_override.
+
+
+WARNING from PE     0: MOM_file_parser : NIGLOBAL over-ridden.  Line: 'NIGLOBAL = 196' in file MOM_override.
+
+
+WARNING from PE     0: MOM_file_parser : NJGLOBAL over-ridden.  Line: 'NJGLOBAL = 180' in file MOM_override.
+
+ MOM domain decomposition
+whalo =    4, ehalo =    4, shalo =    4, nhalo =    4
+  X-AXIS =   98  98
+  Y-AXIS =   90  90
+NOTE from PE     0: diag_manager_mod::diag_manager_init: prepend_date only supported when diag_manager_init is called with time_init present.
+ MOM domain decomposition
+whalo =    4, ehalo =    4, shalo =    4, nhalo =    4
+  X-AXIS =   98  98
+  Y-AXIS =   90  90
+
+WARNING from PE     0: MOM_file_parser : KH over-ridden.  Line: 'KH = 1.0E+01' in file MOM_override.
+
+ MOM domain decomposition
+whalo =    4, ehalo =    4, shalo =    4, nhalo =    4
+  X-AXIS =   98  98
+  Y-AXIS =   90  90
+
+WARNING from PE     0: depth_list_setup: ./Depth_list.nc does not exist.  Creating a new file.
+
+MOM Day       0.000      0: En 1.426570E-13, MaxCFL  0.00000, Mass 5.286494627835E+18
+    Total Energy: 412703D6A81056AE  7.5415532824965357E+05
+    Total Mass:   5.2864946278351124E+18, Change:   0.0000000000000000E+00 Error:  0.00000E+00 ( 0.0E+00)
+MOM Day       1.000    288: En 4.684723E-06, MaxCFL  0.00034, Mass 5.286494627835E+18
+    Total Energy: 42B6863A84E774F4  2.4765763217268953E+13
+    Total Mass:   5.2864946278351124E+18, Change:   1.1289996216109941E+01 Error:  1.12900E+01 ( 2.1E-18)
+MOM Day       2.000    576: En 9.257116E-06, MaxCFL  0.00073, Mass 5.286494627835E+18
+    Total Energy: 42C64118F4ADC223  4.8937694747524273E+13
+    Total Mass:   5.2864946278351124E+18, Change:   1.2610936057606667E+01 Error:  1.26109E+01 ( 2.4E-18)
+MOM Day       3.000    864: En 1.220319E-05, MaxCFL  0.00134, Mass 5.286494627835E+18
+    Total Energy: 42CD5632D3493F19  6.4512114201214195E+13
+    Total Mass:   5.2864946278351124E+18, Change:   4.3164993534987168E+01 Error:  4.31650E+01 ( 8.2E-18)
+MOM Day       4.000   1152: En 1.660411E-05, MaxCFL  0.00119, Mass 5.286494627835E+18
+    Total Energy: 42D3F5537E3FF5A8  8.7777554792406625E+13
+    Total Mass:   5.2864946278351124E+18, Change:   2.1506935300592769E+00 Error:  2.15069E+00 ( 4.1E-19)
+MOM Day       5.000   1440: En 2.022450E-05, MaxCFL  0.00107, Mass 5.286494627835E+18
+    Total Energy: 42D84F5F63F9CBCC  1.0691672748215919E+14
+    Total Mass:   5.2864946278351124E+18, Change:   1.1131268173219517E+01 Error:  1.11313E+01 ( 2.1E-18)
+MOM Day       6.000   1728: En 2.677315E-05, MaxCFL  0.00117, Mass 5.286494627835E+18
+    Total Energy: 42E0173E1ABE5E22  1.4153609785828906E+14
+    Total Mass:   5.2864946278351124E+18, Change:  -2.5071771754309857E+00 Error: -2.50718E+00 (-4.7E-19)
+MOM Day       7.000   2016: En 3.295367E-05, MaxCFL  0.00149, Mass 5.286494627835E+18
+    Total Energy: 42E3CE2943202E34  1.7420941164580962E+14
+    Total Mass:   5.2864946278351124E+18, Change:  -1.9438468372609183E+01 Error: -1.94385E+01 (-3.7E-18)
+MOM Day       8.000   2304: En 3.982351E-05, MaxCFL  0.00205, Mass 5.286494627835E+18
+    Total Energy: 42E7EF228AA80C0E  2.1052675307939244E+14
+    Total Mass:   5.2864946278351124E+18, Change:  -1.6310480038892685E+01 Error: -1.63105E+01 (-3.1E-18)
+MOM Day       9.000   2592: En 4.884873E-05, MaxCFL  0.00253, Mass 5.286494627835E+18
+    Total Energy: 42ED5BBB2DC3959A  2.5823855654417281E+14
+    Total Mass:   5.2864946278351124E+18, Change:   3.6661265037871097E+01 Error:  3.66613E+01 ( 6.9E-18)
+MOM Day      10.000   2880: En 5.473945E-05, MaxCFL  0.00290, Mass 5.286494627835E+18
+    Total Energy: 42F07307C9E9738D  2.8937980730348081E+14
+    Total Mass:   5.2864946278351124E+18, Change:  -2.4177032002084822E+00 Error: -2.41770E+00 (-4.6E-19)
+ MPP_DOMAINS_STACK high water mark=       52920
+
+Tabulating mpp_clock statistics across      4 PEs...
+
+                                          tmin          tmax          tavg          tstd  tfrac grain pemin pemax
+Total runtime                       166.079550    166.080326    166.079957      0.000370  1.000     0     0     3
+Initialization                        0.156198      0.163125      0.159406      0.003211  0.001     0     0     3
+Main loop                           165.784530    165.785834    165.785437      0.000527  0.998     0     0     3
+Termination                           0.124163      0.125797      0.125284      0.000653  0.001     0     0     3
+ MPP_STACK high water mark=           0
