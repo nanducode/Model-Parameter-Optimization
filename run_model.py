@@ -13,7 +13,7 @@ def run_prep(model_name):
     remove_dir.wait()
 
     # copy start directory into a new directory
-    create_dir = subprocess.Popen("cp -r " + MOM6DIR + "/ocean_only/double_gyre_start" +
+    create_dir = subprocess.Popen("cp -r double_gyre_base/" +
                                   " " + MOM6DIR + "/ocean_only/" + model_name,
                                   shell=True)
     create_dir.wait()
@@ -65,6 +65,8 @@ def collect_data_from_run(model_name):
             move_file(file_name, model_name)
         # all netCDF data
         elif file_name.endswith(".nc"):
+            move_file(file_name, model_name)
+        elif file_name == "input.nml":
             move_file(file_name, model_name)
 
 
