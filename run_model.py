@@ -29,13 +29,17 @@ def run_prep(model_name):
     create_dir.wait()
 
 
-def write_override_configs(model):
-    """Writes configurations for model before run"""
+def write_override_parameters(model):
+    """Writes parameters for model before run"""
 
     # Open MOM_override
-    override = open(MOM6DIR + "/ocean_only/" + model.name + "/MOM_override", mode="w+")
-    for k, v in model.configs.items():
-        override.write("#override " + k + "=" + v + "\n")
+    override = open(MOM6DIR + "/ocean_only/" + model.run_name + "/MOM_override", mode="w+")
+    for k, v in model.parameters.items():
+        if k in model.altered_params:
+            altered = model.altered_params[k]
+            override.write("#override " + k + "=" + str(altered) + "\n")
+        else:
+            override.write("#override " + k + "=" + str(v) + "\n")
     override.close()
 
 
@@ -70,10 +74,10 @@ def collect_data_from_run(model_name):
             move_file(file_name, model_name)
 
 
-def run_MOM6_model(model_name):
+def run_MOM6_model(model_name, num_proc):
     """Runs the MOM6 model (ocean-only), captures output and places all
        output files in current directory in dir named after model_name"""
-    run_model = subprocess.Popen("mpirun -n 4 ../../build/intel/ocean_only/repro/MOM6",
+    run_model = subprocess.Popen("mpirun -n " + str(num_proc) + " ../../build/intel/ocean_only/repro/MOM6",
                                  cwd=MOM6DIR + "/ocean_only/" + model_name,
                                  stdout=subprocess.PIPE,
                                  shell=True)
@@ -89,6 +93,34 @@ def run_MOM6_model(model_name):
 
 
 
+def run_multiple_configurations(model_list, percent_alteration, num_alters, num_proc):
+    """Runs multiple iterations of the MOM6 model.
+       Each iteration a parameter is altered by percent alteration
+       percent_alteration is increase each time by step
+       Each model is run for a number of times specified by num_alters"""
+
+    param_to_alter = "KH"
+
+    for m in model_list:
+
+        # reset alteration percentage
+        percent_alter = percent_alteration
+        for i in range(num_alters):
+
+            # Change alteration percentage
+            percent = percent_alter * m.step
+
+            # alter parameter by percent_alter
+            m.alter_parameter(param_to_alter, percent)
+            new_param_val = m.get_parameter(param_to_alter)
+            m.set_run_name(str(new_param_val))
+            run_prep(m.run_name)
+
+            write_override_parameters(m)
+            run_MOM6_model(m.run_name, num_proc)
+
+
+
 if __name__ == "__main__":
 
     # variables to set for the run
@@ -97,7 +129,10 @@ if __name__ == "__main__":
     #list of models
     model_list = create_model_configurations()
 
-    for m in model_list:
-        run_prep(m.name)
-        write_override_configs(m)
-        run_MOM6_model(m.name)
+    # number of processors to run on
+    num_proc = 4
+
+    # run multiple configurations of the models in model_list
+    alteration_percentage = .05
+    num_alters = 10
+    run_multiple_configurations(model_list, alteration_percentage, num_alters, num_proc)
