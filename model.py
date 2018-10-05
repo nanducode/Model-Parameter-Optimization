@@ -39,14 +39,16 @@ def create_model_configurations():
                 {"NIGLOBAL": 44,
                  "NJGLOBAL": 40,
                  "DT": 1200,
-                 "KH": 50000})
+                 "KH": 50000,
+                 "LAPLACIAN": True})
 
     med = Model("1-4_deg",
                 (88, 80),
                 {"NIGLOBAL": 88,
                  "NJGLOBAL": 80,
                  "DT": 1200,
-                 "KH": 50000})
+                 "KH": 50000,
+                 "LAPLACIAN": True})
 
     # high = Model("12km",
     #             (196, 180),
