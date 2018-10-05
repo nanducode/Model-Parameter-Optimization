@@ -95,7 +95,7 @@ def run_MOM6_model(model_name, num_proc):
 
 
 
-def run_multiple_configurations(model_list, percent_alteration, num_alters, num_proc):
+def run_multiple_configurations(model_list, num_alters, num_proc):
     """Runs multiple iterations of the MOM6 model.
        Each iteration a parameter is altered by percent alteration
        percent_alteration is increase each time by step
@@ -104,16 +104,10 @@ def run_multiple_configurations(model_list, percent_alteration, num_alters, num_
     param_to_alter = "KH"
 
     for m in model_list:
-
-        # reset alteration percentage
-        percent_alter = percent_alteration
         for i in range(num_alters):
 
-            # Change alteration percentage
-            percent = percent_alter * m.step
-
-            # alter parameter by percent_alter
-            m.alter_parameter(param_to_alter, percent)
+            # decrease paramter value by model.step
+            m.alter_parameter(param_to_alter)
             new_param_val = m.get_parameter(param_to_alter)
             m.set_run_name(str(new_param_val))
             run_prep(m.run_name)
@@ -135,6 +129,5 @@ if __name__ == "__main__":
     num_proc = 32
 
     # run multiple configurations of the models in model_list
-    alteration_percentage = .05
-    num_alters = 10
-    run_multiple_configurations(model_list, alteration_percentage, num_alters, num_proc)
+    num_alters = 33
+    run_multiple_configurations(model_list, num_alters, num_proc)

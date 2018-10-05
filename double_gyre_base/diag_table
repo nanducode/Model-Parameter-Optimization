@@ -33,8 +33,8 @@
 "ocean_model","uh","uh","ocean_mean_5day","all",.true.,"none",2
 "ocean_model","vh","vh","ocean_mean_5day","all",.true.,"none",2
 # 5 day snapshot
-"ocean_model","KE","KE","ocean_snap_5day","all",.true.,"none",2
-"ocean_model","RV","RV","ocean_snap_5day","all",.true.,"none",2
+"ocean_model","KE","KE","ocean_snap_5day","all",.false.,"none",2
+"ocean_model","RV","RV","ocean_snap_5day","all",.false.,"none",2
 
 
 
