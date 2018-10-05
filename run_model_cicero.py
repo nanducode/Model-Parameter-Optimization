@@ -67,6 +67,8 @@ def collect_data_from_run(model_name):
         # Diagnostic table
         elif file_name == "diag_table":
             move_file(file_name, model_name)
+        elif file_name == "MOM_override":
+            move_file(file_name, model_name)
         # all netCDF data
         elif file_name.endswith(".nc"):
             move_file(file_name, model_name)
