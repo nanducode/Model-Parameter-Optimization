@@ -7,33 +7,24 @@ from model import Model, create_model_configurations
 
 
 def run_prep(model_name):
-    # Remove directory from previous run
-    remove_dir = subprocess.Popen("rm -rf " + MOM6DIR + "/ocean_only/" + model_name,
-                                  shell=True)
-    remove_dir.wait()
 
     # copy start directory into a new directory
     create_dir = subprocess.Popen("cp -r double_gyre_base/" +
-                                  " " + MOM6DIR + "/ocean_only/" + model_name,
+                                  " ./" + model_name,
                                   shell=True)
     create_dir.wait()
 
     # Setup restart for run
-    create_restart = subprocess.Popen("mkdir -p " + MOM6DIR + "/ocean_only/"
-                                      + model_name + "/RESTART",
+    create_restart = subprocess.Popen("mkdir -p ./" + model_name + "/RESTART",
                                       shell=True)
     create_restart.wait()
-
-    # Create data dir in MPO dir
-    create_dir = subprocess.Popen("mkdir -p ./" + model_name, shell=True)
-    create_dir.wait()
 
 
 def write_override_parameters(model):
     """Writes parameters for model before run"""
 
     # Open MOM_override
-    override = open(MOM6DIR + "/ocean_only/" + model.run_name + "/MOM_override", mode="w+")
+    override = open("./" + model.run_name + "/MOM_override", mode="w+")
     for k, v in model.parameters.items():
         if k in model.altered_params:
             altered = model.altered_params[k]
@@ -52,6 +43,7 @@ def move_file(f, model_name):
 def collect_data_from_run(model_name):
     """Collects all data from a run"""
     run_dir_glob = MOM6DIR + "/ocean_only/" + model_name + "/*"
+
     for f in glob.glob(run_dir_glob):
         file_name = path.basename(f)
         # MOM_parameter_doc.
@@ -76,13 +68,11 @@ def collect_data_from_run(model_name):
             move_file(file_name, model_name)
 
 
-def run_MOM6_model(model_name, num_proc):
+def run_MOM6_model(model_name):
     """Runs the MOM6 model (ocean-only), captures output and places all
        output files in current directory in dir named after model_name"""
-    run_model = subprocess.Popen("salloc -N " + str(num_proc) + " -n " + str(num_proc)
-                                 + " ../../../../run_training" +
-                                 " ../../build/gnu/ocean_only/repro/MOM6",
-                                 cwd=MOM6DIR + "/ocean_only/" + model_name,
+    print("Running " + model_name + "...")
+    run_model = subprocess.Popen("srun ../Ocean/MOM6-examples/build/gnu/ocean_only/repro/MOM6",
                                  stdout=subprocess.PIPE,
                                  shell=True)
     run_model.wait()
@@ -92,19 +82,15 @@ def run_MOM6_model(model_name, num_proc):
     f = open(model_name + "/output.txt", "wb+")
     f.write(model_output)
 
-    # get all parameter and .nc files
-    collect_data_from_run(model_name)
 
 
-
-def run_multiple_configurations(model_list, num_alters, num_proc):
-    """Runs multiple iterations of the MOM6 model.
-       Each iteration a parameter is altered by percent alteration
-       percent_alteration is increase each time by step
+def setup_multiple_configurations(model_list, num_alters):
+    """sets up multiple iterations of the MOM6 model.
        Each model is run for a number of times specified by num_alters"""
 
     param_to_alter = "KH"
 
+    print("Setting up model configurations for multiple runs...")
     for m in model_list:
         for i in range(num_alters):
 
@@ -113,23 +99,25 @@ def run_multiple_configurations(model_list, num_alters, num_proc):
             new_param_val = m.get_parameter(param_to_alter)
             m.set_run_name(str(new_param_val))
             run_prep(m.run_name)
-
             write_override_parameters(m)
-            run_MOM6_model(m.run_name, num_proc)
+            run_names.append(m.run_name)
 
+
+def run_all_configurations(model_names):
+    for configured_model_name in model_names:
+        run_MOM6_model(configured_model_name)
 
 
 if __name__ == "__main__":
 
-    # variables to set for the run
-    MOM6DIR = "../Ocean/MOM6-examples"
-
-    #list of models
+    #list of base models
     model_list = create_model_configurations()
 
-    # number of processors to run on
-    num_proc = 32
+    # list of configured models
+    run_names = []
 
     # run multiple configurations of the models in model_list
-    num_alters = 33
-    run_multiple_configurations(model_list, num_alters, num_proc)
+    num_alters = 34
+    setup_multiple_configurations(model_list, num_alters)
+
+    run_all_configurations(run_names)
