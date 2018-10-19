@@ -28,6 +28,9 @@
 "ocean_model","KE","KE","ocean_mean_month","all",.true.,"none",2
 "ocean_model","uh","uh","ocean_mean_month","all",.true.,"none",2
 "ocean_model","vh","vh","ocean_mean_month","all",.true.,"none",2
+"ocean_model","dye001","dye001","ocean_mean_month","all",.true.,"none",2
+"ocean_model","dye002","dye002","ocean_mean_month","all",.true.,"none",2
+"ocean_model","dye003","dye003","ocean_mean_month","all",.true.,"none",2
 # 5day mean
 "ocean_model","KE","KE","ocean_mean_5day","all",.true.,"none",2
 "ocean_model","uh","uh","ocean_mean_5day","all",.true.,"none",2
