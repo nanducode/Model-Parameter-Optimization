@@ -18,7 +18,7 @@ def shape_training_data(run_data):
     data = run_data[list(run_data.keys())[1]]
 
     # define state_tensor
-    state_vars = ["dye001", "dye002", "dye003", "stream"]
+    state_vars = ["dye001", "dye002", "dye003", "stream", "KE"]
     num_state_vars = len(state_vars)
 
     # Dimensions of the data
@@ -83,5 +83,5 @@ def create_training_samples(data_path):
 
 
 path = "/Users/spartee/Dropbox/Professional/Cray/399-Thesis/low-res-3yr/"
-print(create_training_samples(path))
+print(list(create_training_samples(path).values())[1])
 
