@@ -36,6 +36,18 @@ def shape_training_data(run_data):
     return state_tensors, data_info
 
 
+def normalize_data(state_tensors):
+    import pandas as pd
+    for run, state_tensor in state_tensors.items():
+        df = pd.DataFrame(state_tensor)
+        mean = df.mean(axis=0)
+        df -= mean
+        std = df.std(axis=0)
+        df /= std
+        state_tensors[run] = df
+    return state_tensors
+
+
 def create_training_samples(data_path):
 
     # collect data from run
@@ -66,22 +78,10 @@ def create_training_samples(data_path):
                 state_tensor[:,ncol] = np.array(data[var][t0:tf,:,:,:].mean('time')[layer,:,:]).reshape(grid_points)
                 ncol += 1
 
+    nomalized_state_tensors = normalize_data(state_tensors)
     return state_tensors
 
 
-def plot_training_samples(data_path):
-    state_tensors = create_training_samples(data_path)
-    run_data = collect_run_data(data_path)
-    for run, state_tensor in state_tensors.items():
-        data = run_data[run]
-        tmp = state_tensor[:,0].reshape( (40, 44) )
-        plt.pcolormesh(data.xh,data.yh,tmp)
-        print(run)
-        plt.colorbar()
-        plt.show()
-
-
 path = "/Users/spartee/Dropbox/Professional/Cray/399-Thesis/low-res-3yr/"
-data = collect_run_data(path)
-print(data)
+print(create_training_samples(path))
 
