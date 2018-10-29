@@ -1,0 +1,87 @@
+import xarray as xr
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
+def collect_run_data(data_path):
+    run_data = {}
+
+    # retrieve monthly run dataset
+    for run in os.listdir(data_path):
+        run_data[run] = xr.open_dataset(data_path + run + '/ocean_mean_month.nc',decode_times=False)
+
+    return run_data
+
+def shape_training_data(run_data):
+
+    # get data sample for measurements
+    data = run_data[list(run_data.keys())[1]]
+
+    # define state_tensor
+    state_vars = ["dye001", "dye002", "dye003", "stream"]
+    num_state_vars = len(state_vars)
+
+    # Dimensions of the data
+    layers = len(data.zl)
+    latitude = data.yh.size
+    longitude = data.xh.size
+    grid_points = latitude * longitude
+    data_info = (state_vars, layers, latitude, longitude)
+
+    # Create arrays which will become the state tensor
+    state_tensors = dict.fromkeys(run_data.keys())
+    for run in run_data.keys():
+        state_tensors[run] = np.zeros((grid_points, num_state_vars * layers))
+
+    return state_tensors, data_info
+
+
+def create_training_samples(data_path):
+
+    # collect data from run
+    run_data = collect_run_data(data_path)
+
+    # get state tensors for each run to hold training data
+    state_tensors, data_info = shape_training_data(run_data)
+    state_vars = data_info[0]
+    layers = data_info[1]
+    grid_points = data_info[2] * data_info[3]
+
+    # Define indices for time averaging
+    t0 = 12
+    tf = -1
+
+    # Calculate zonal streamfunction
+    for run in run_data.keys():
+        data = run_data[run]
+        run_data[run]["stream"] = data.vh.cumsum('xh')
+
+    for run, state_tensor in state_tensors.items():
+    # Loop over all state variables to create state tensor
+        data = run_data[run]
+        ncol = 0
+        for var in state_vars:
+            for layer in range(0, layers):
+                # Average the data in time (note that )
+                state_tensor[:,ncol] = np.array(data[var][t0:tf,:,:,:].mean('time')[layer,:,:]).reshape(grid_points)
+                ncol += 1
+
+    return state_tensors
+
+
+def plot_training_samples(data_path):
+    state_tensors = create_training_samples(data_path)
+    run_data = collect_run_data(data_path)
+    for run, state_tensor in state_tensors.items():
+        data = run_data[run]
+        tmp = state_tensor[:,0].reshape( (40, 44) )
+        plt.pcolormesh(data.xh,data.yh,tmp)
+        print(run)
+        plt.colorbar()
+        plt.show()
+
+
+path = "/Users/spartee/Dropbox/Professional/Cray/399-Thesis/low-res-3yr/"
+data = collect_run_data(path)
+print(data)
+
