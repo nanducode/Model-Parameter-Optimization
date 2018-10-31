@@ -6,10 +6,14 @@ import os
 def collect_run_data(data_path):
     """Collect all data sets from runs folder"""
     run_data = {}
+    years_simmed = 10
 
     # retrieve monthly run dataset
     for run in os.listdir(data_path):
-        run_data[run] = xr.open_dataset(data_path + run + '/ocean_mean_month.nc',decode_times=False)
+        data = xr.open_dataset(data_path + run + '/ocean_mean_month.nc',decode_times=False)
+        data_by_year = list(data.groupby("time"))
+        for year in range(years_simmed):
+            run_data[run + "_" + str(year)] = data_by_year[year][1]
 
     return run_data
 
@@ -81,13 +85,28 @@ def create_training_samples(data_path):
         for var in state_vars:
             for layer in range(0, layers):
                 # Average the data in time (note that )
-                state_tensor[:,ncol] = np.array(data[var][t0:tf,:,:,:].mean('time')[layer,:,:]).reshape(grid_points)
+                # [t0:tf,:,:,:].mean('time')
+                state_tensor[:,ncol] = np.array(data[var][layer,:,:]).reshape(grid_points)
                 ncol += 1
 
     nomalized_state_tensors = normalize_data(state_tensors)
     return state_tensors
 
 
+def average_by_year(num_years, training_samples):
+    KH = set([x.split("_")[2] for x in training_samples.keys()])
+    full = dict.fromkeys(KH, [])
+    for name, sample in training_samples.items():
+        for vis in KH:
+            if vis in name:
+                full[vis].append(sample)
+
+    return full
+
+
+
 path = "/Users/spartee/Dropbox/Professional/Cray/399-Thesis/low-res-3yr/"
-print(list(create_training_samples(path).values())[1])
+training_samples = create_training_samples(path)
+print(average_by_year(2, training_samples))
+
 
