@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import os
 
 def collect_run_data(data_path):
+    """Collect all data sets from runs folder"""
     run_data = {}
 
     # retrieve monthly run dataset
@@ -13,6 +14,8 @@ def collect_run_data(data_path):
     return run_data
 
 def shape_training_data(run_data):
+    """Create state tensors to hold output of the MOM6 model
+       state tensor = (lat + long) x len(state_vars)"""
 
     # get data sample for measurements
     data = run_data[list(run_data.keys())[1]]
@@ -37,6 +40,7 @@ def shape_training_data(run_data):
 
 
 def normalize_data(state_tensors):
+    """Create normal distribution of data and put into pandas dataframe"""
     import pandas as pd
     for run, state_tensor in state_tensors.items():
         df = pd.DataFrame(state_tensor)
@@ -49,6 +53,8 @@ def normalize_data(state_tensors):
 
 
 def create_training_samples(data_path):
+    """time average run data and place into state tensors
+       outputs dictionary of normalized state tensors for training"""
 
     # collect data from run
     run_data = collect_run_data(data_path)
