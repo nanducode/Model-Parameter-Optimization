@@ -1,19 +1,20 @@
 import xarray as xr
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 import os
 
 def collect_run_data(data_path):
     """Collect all data sets from runs folder"""
     run_data = {}
-    years_simmed = 10
+    months_simmed = 120
 
-    # retrieve monthly run dataset
+    # retrieve run dataset for each year of the simulations
     for run in os.listdir(data_path):
         data = xr.open_dataset(data_path + run + '/ocean_mean_month.nc',decode_times=False)
-        data_by_year = list(data.groupby("time"))
-        for year in range(years_simmed):
-            run_data[run + "_" + str(year)] = data_by_year[year][1]
+        data_by_month = list(data.groupby("time"))
+        for month in range(months_simmed):
+            run_data[run + "_" + str(month)] = data_by_month[month][1]
 
     return run_data
 
@@ -42,18 +43,6 @@ def shape_training_data(run_data):
 
     return state_tensors, data_info
 
-
-def normalize_data(state_tensors):
-    """Create normal distribution of data and put into pandas dataframe"""
-    import pandas as pd
-    for run, state_tensor in state_tensors.items():
-        df = pd.DataFrame(state_tensor)
-        mean = df.mean(axis=0)
-        df -= mean
-        std = df.std(axis=0)
-        df /= std
-        state_tensors[run] = df
-    return state_tensors
 
 
 def create_training_samples(data_path):
@@ -89,24 +78,57 @@ def create_training_samples(data_path):
                 state_tensor[:,ncol] = np.array(data[var][layer,:,:]).reshape(grid_points)
                 ncol += 1
 
-    nomalized_state_tensors = normalize_data(state_tensors)
+        state_tensors[run] = pd.DataFrame(state_tensor)
+
     return state_tensors
 
 
-def average_by_year(num_years, training_samples):
+def average_by_year(num_years, years_simmed, training_samples):
+    """Takes in training samples to be averaged by num years of simulation
+       Returns a dictionary of KH : [samples_averaged_by_year]"""
     KH = set([x.split("_")[2] for x in training_samples.keys()])
-    full = dict.fromkeys(KH, [])
+    unaveraged = dict.fromkeys(KH, [])
+    avg_samples = dict.fromkeys(KH, [])
     for name, sample in training_samples.items():
         for vis in KH:
             if vis in name:
-                full[vis].append(sample)
+                unaveraged[vis].append(sample)
 
-    return full
+    for kh, sl in unaveraged.items():
+        avg_samples[kh] = [pd.concat((sl[x:x+num_years*12])).groupby(level=0).mean()
+                           for x in range(years_simmed*12) if x % (num_years * 12) == 0]
 
+    return avg_samples
+
+
+def normalize_data(state_tensors):
+    """Create normal distribution of data in each time averaged sample"""
+    for run, sample_list in state_tensors.items():
+        for state_tensor in sample_list:
+            mean = state_tensor.mean(axis=0)
+            state_tensor -= mean
+            std = state_tensor.std(axis=0)
+            state_tensor /= std
+    return state_tensors
+
+
+def write_datasets(train_data):
+    basepath = os.getcwd() +  "/data/"
+    os.mkdir(basepath)
+    path = basepath
+    for  kh, training_samples in train_data.items():
+        for i, sample in enumerate(training_samples):
+            path +=  kh + "_" + str(i) + ".csv"
+            sample.to_csv(path)
+            path = basepath
 
 
 path = "/Users/spartee/Dropbox/Professional/Cray/399-Thesis/low-res-3yr/"
 training_samples = create_training_samples(path)
-print(average_by_year(2, training_samples))
+averaged_state_tensors = average_by_year(2, 10, training_samples)
+normalized_state_tensors = normalize_data(averaged_state_tensors)
+write_datasets(normalized_state_tensors)
+
+
 
 
