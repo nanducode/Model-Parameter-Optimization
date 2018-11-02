@@ -119,13 +119,13 @@ def write_datasets(train_data):
     for  kh, training_samples in train_data.items():
         for i, sample in enumerate(training_samples):
             path +=  kh + "_" + str(i) + ".csv"
-            sample.to_csv(path)
+            sample.to_csv(path, index=False, header=False)
             path = basepath
 
 
-path = "/Users/spartee/Dropbox/Professional/Cray/399-Thesis/low-res-3yr/"
+path = "/Users/spartee/Dropbox/Professional/Cray/399-Thesis/low-res-with-tracer/"
 training_samples = create_training_samples(path)
-averaged_state_tensors = average_by_year(2, 10, training_samples)
+averaged_state_tensors = average_by_year(5, 100, training_samples)
 normalized_state_tensors = normalize_data(averaged_state_tensors)
 write_datasets(normalized_state_tensors)
 
