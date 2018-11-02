@@ -47,7 +47,7 @@ def shape_training_data(run_data):
 
 def create_training_samples(data_path):
     """time average run data and place into state tensors
-       outputs dictionary of normalized state tensors for training"""
+       outputs dictionary of state tensors for training"""
 
     # collect data from run
     run_data = collect_run_data(data_path)
@@ -123,7 +123,7 @@ def write_datasets(train_data):
             path = basepath
 
 
-path = "/Users/spartee/Dropbox/Professional/Cray/399-Thesis/low-res-with-tracer/"
+path = "/Users/spartee/Dropbox/Professional/Cray/399-Thesis/low-res-with_tracer/"
 training_samples = create_training_samples(path)
 averaged_state_tensors = average_by_year(5, 100, training_samples)
 normalized_state_tensors = normalize_data(averaged_state_tensors)

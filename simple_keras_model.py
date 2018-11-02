@@ -35,9 +35,9 @@ def get_training_data(path):
     test_targets = np.array(test_targets)
 
     #randomly permute training data
-    p = np.random.permutation(len(train_data))
-    train_data = train_data[p]
-    train_targets = train_targets[p]
+#    p = np.random.permutation(len(train_data))
+ #   train_data = train_data[p]
+ #   train_targets = train_targets[p]
 
     return train_data, train_targets, test_data, test_targets
 
@@ -46,12 +46,9 @@ def build_model():
     model = models.Sequential()
     model.add(layers.Dense(256, activation='relu',
                            input_shape=(train_data.shape[1], train_data.shape[2])))
-    model.add(layers.Dropout(.5))
-    model.add(layers.Dense(128, activation='relu'))
-    model.add(layers.Dropout(.5))
     model.add(layers.Flatten())
     model.add(layers.Dense(1))
-    sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=1.)
+    sgd = optimizers.SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True, clipnorm=.9)
     model.compile(optimizer=sgd, loss='mse', metrics=['mae'])
     return model
 
@@ -64,7 +61,7 @@ train_data, train_targets, test_data, test_targets = get_training_data(
 model = build_model()
 # Train it on the entirety of the data.
 model.fit(train_data, train_targets,
-          epochs=40, batch_size=128, verbose=1)
+          epochs=40, batch_size=128, verbose=1, validation_split=.2)
 test_mse_score, test_mae_score = model.evaluate(test_data, test_targets)
 print(test_mse_score)
 print(test_mae_score)
