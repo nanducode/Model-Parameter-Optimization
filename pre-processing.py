@@ -7,7 +7,8 @@ import os
 def collect_run_data(data_path):
     """Collect all data sets from runs folder"""
     run_data = {}
-    months_simmed = 120
+    months_simmed = 1200
+    print("collecting data...")
 
     # retrieve run dataset for each year of the simulations
     for run in os.listdir(data_path):
@@ -68,13 +69,12 @@ def create_training_samples(data_path):
         run_data[run]["stream"] = data.vh.cumsum('xh')
 
     for run, state_tensor in state_tensors.items():
-    # Loop over all state variables to create state tensor
+        print("processing " + run)
+        # Loop over all state variables to create state tensor
         data = run_data[run]
         ncol = 0
         for var in state_vars:
             for layer in range(0, layers):
-                # Average the data in time (note that )
-                # [t0:tf,:,:,:].mean('time')
                 state_tensor[:,ncol] = np.array(data[var][layer,:,:]).reshape(grid_points)
                 ncol += 1
 
@@ -90,11 +90,12 @@ def average_by_year(num_years, years_simmed, training_samples):
     unaveraged = dict.fromkeys(KH, [])
     avg_samples = dict.fromkeys(KH, [])
     for name, sample in training_samples.items():
-        for vis in KH:
-            if vis in name:
-                unaveraged[vis].append(sample)
+        vis = name.split("_")[2]
+        unaveraged[vis].append(sample)
+
 
     for kh, sl in unaveraged.items():
+        print("Averaging samples for " + kh)
         avg_samples[kh] = [pd.concat((sl[x:x+num_years*12])).groupby(level=0).mean()
                            for x in range(years_simmed*12) if x % (num_years * 12) == 0]
 
@@ -104,6 +105,7 @@ def average_by_year(num_years, years_simmed, training_samples):
 def normalize_data(state_tensors):
     """Create normal distribution of data in each time averaged sample"""
     for run, sample_list in state_tensors.items():
+        print("normalizing " + run)
         for state_tensor in sample_list:
             mean = state_tensor.mean(axis=0)
             state_tensor -= mean
@@ -116,19 +118,24 @@ def write_datasets(train_data):
     basepath = os.getcwd() +  "/data/"
     os.mkdir(basepath)
     path = basepath
+    print("writing to files...")
     for  kh, training_samples in train_data.items():
         for i, sample in enumerate(training_samples):
             path +=  kh + "_" + str(i) + ".csv"
             sample.to_csv(path, index=False, header=False)
             path = basepath
 
+import time
+start_time = time.time()
 
-path = "/Users/spartee/Dropbox/Professional/Cray/399-Thesis/low-res-with_tracer/"
+path = "/Users/spartee/Dropbox/Professional/Cray/399-Thesis/low-res-with-tracer/"
 training_samples = create_training_samples(path)
 averaged_state_tensors = average_by_year(5, 100, training_samples)
 normalized_state_tensors = normalize_data(averaged_state_tensors)
 write_datasets(normalized_state_tensors)
 
+
+print("--- %s seconds ---" % (time.time() - start_time))
 
 
 
