@@ -19,23 +19,22 @@ def collect_run_data(data_path):
 
     return run_data
 
-def shape_training_data(run_data):
+def shape_training_data(run_data, state_values):
     """Create state tensors to hold output of the MOM6 model
        state tensor = (lat + long) x len(state_vars)"""
 
     # get data sample for measurements
     data = run_data[list(run_data.keys())[1]]
 
-    # define state_tensor
-    state_vars = ["dye001", "dye002", "dye003", "stream", "KE"]
-    num_state_vars = len(state_vars)
+    # get number of columns per grid point
+    num_state_vars = len(state_values)
 
     # Dimensions of the data
     layers = len(data.zl)
     latitude = data.yh.size
     longitude = data.xh.size
     grid_points = latitude * longitude
-    data_info = (state_vars, layers, latitude, longitude)
+    data_info = (layers, latitude, longitude)
 
     # Create arrays which will become the state tensor
     state_tensors = dict.fromkeys(run_data.keys())
@@ -46,7 +45,7 @@ def shape_training_data(run_data):
 
 
 
-def create_training_samples(data_path):
+def create_training_samples(data_path, state_values):
     """time average run data and place into state tensors
        outputs dictionary of state tensors for training"""
 
@@ -54,10 +53,9 @@ def create_training_samples(data_path):
     run_data = collect_run_data(data_path)
 
     # get state tensors for each run to hold training data
-    state_tensors, data_info = shape_training_data(run_data)
-    state_vars = data_info[0]
-    layers = data_info[1]
-    grid_points = data_info[2] * data_info[3]
+    state_tensors, data_info = shape_training_data(run_data, state_values)
+    layers = data_info[0]
+    grid_points = data_info[1] * data_info[2]
 
     # Define indices for time averaging
     t0 = 12
@@ -73,7 +71,7 @@ def create_training_samples(data_path):
         # Loop over all state variables to create state tensor
         data = run_data[run]
         ncol = 0
-        for var in state_vars:
+        for var in state_values:
             for layer in range(0, layers):
                 state_tensor[:,ncol] = np.array(data[var][layer,:,:]).reshape(grid_points)
                 ncol += 1
@@ -125,17 +123,39 @@ def write_datasets(train_data):
             sample.to_csv(path, index=False, header=False)
             path = basepath
 
-import time
-start_time = time.time()
 
-path = "/Users/spartee/Dropbox/Professional/Cray/399-Thesis/low-res-with-tracer/"
-training_samples = create_training_samples(path)
-averaged_state_tensors = average_by_year(5, 100, training_samples)
-normalized_state_tensors = normalize_data(averaged_state_tensors)
-write_datasets(normalized_state_tensors)
+if __name__ == "__main__":
+    import sys
+    import time
 
+    if len(sys.argv) < 4:
+        print("Usage: python3 pre-processing.py data_dir_path years_simmed time_window")
+        print("Example: python3 pre-processing.py /data 100 5")
+    else:
 
-print("--- %s seconds ---" % (time.time() - start_time))
+        try:
+            # columns of each grid point
+            state_values = ["dye001", "dye002", "dye003", "stream", "KE"]
+
+            data_path = os.getcwd() + sys.argv[1]
+            if not os.path.isdir(data_path):
+                raise Exception("Data directory not found")
+
+            years_simmed = int(sys.argv[2])
+            time_window = int(sys.argv[3])
+
+            # clock pre-processing time
+            start_time = time.time()
+
+            training_samples = create_training_samples(path, state_values)
+            averaged_state_tensors = average_by_year(time_window, years_simmed, training_samples)
+            normalized_state_tensors = normalize_data(averaged_state_tensors)
+            write_datasets(normalized_state_tensors)
+
+            print("--- %s minutes ---" % ((time.time() - start_time)/60))
+
+        except Exception as e:
+            print(e)
 
 
 
