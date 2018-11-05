@@ -57,9 +57,6 @@ def create_training_samples(data_path, state_values):
     layers = data_info[0]
     grid_points = data_info[1] * data_info[2]
 
-    # Define indices for time averaging
-    t0 = 12
-    tf = -1
 
     # Calculate zonal streamfunction
     for run in run_data.keys():
@@ -69,6 +66,7 @@ def create_training_samples(data_path, state_values):
     for run, state_tensor in state_tensors.items():
         print("processing " + run)
         # Loop over all state variables to create state tensor
+        KH = run.split("_")[2]
         data = run_data[run]
         ncol = 0
         for var in state_values:
@@ -77,6 +75,7 @@ def create_training_samples(data_path, state_values):
                 ncol += 1
 
         state_tensors[run] = pd.DataFrame(state_tensor)
+
 
     return state_tensors
 
@@ -119,7 +118,7 @@ def write_datasets(train_data):
     print("writing to files...")
     for  kh, training_samples in train_data.items():
         for i, sample in enumerate(training_samples):
-            path +=  kh + "_" + str(i) + ".csv"
+            path += kh + "_" + str(i) + ".csv"
             sample.to_csv(path, index=False, header=False)
             path = basepath
 
@@ -130,32 +129,33 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 4:
         print("Usage: python3 pre-processing.py data_dir_path years_simmed time_window")
-        print("Example: python3 pre-processing.py /data 100 5")
+        print("Example: python3 pre-processing.py /../low-res-with-tracer 100 5")
     else:
 
         try:
             # columns of each grid point
             state_values = ["dye001", "dye002", "dye003", "stream", "KE"]
 
-            data_path = os.getcwd() + sys.argv[1]
+            data_path = os.getcwd() + sys.argv[1] + "/"
             if not os.path.isdir(data_path):
                 raise Exception("Data directory not found")
 
-            years_simmed = int(sys.argv[2])
-            time_window = int(sys.argv[3])
-
-            # clock pre-processing time
-            start_time = time.time()
-
-            training_samples = create_training_samples(path, state_values)
-            averaged_state_tensors = average_by_year(time_window, years_simmed, training_samples)
-            normalized_state_tensors = normalize_data(averaged_state_tensors)
-            write_datasets(normalized_state_tensors)
-
-            print("--- %s minutes ---" % ((time.time() - start_time)/60))
-
         except Exception as e:
             print(e)
+
+        years_simmed = int(sys.argv[2])
+        time_window = int(sys.argv[3])
+
+        # clock pre-processing time
+        start_time = time.time()
+
+        training_samples = create_training_samples(data_path, state_values)
+        averaged_state_tensors = average_by_year(time_window, years_simmed, training_samples)
+        normalized_state_tensors = normalize_data(averaged_state_tensors)
+        write_datasets(normalized_state_tensors)
+
+        print("--- %s minutes ---" % ((time.time() - start_time)/60))
+
 
 
 
