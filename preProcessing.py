@@ -18,7 +18,7 @@ def collect_run_data(data_path):
         data = xr.open_dataset(data_path + run + '/ocean_mean_month.nc',decode_times=False)
         data_by_month = list(data.groupby("time"))
         # remove first 10 years of the simulation
-        for month in range(120, months_simmed):
+        for month in range(months_simmed): # edit this to a smaller range for a smaller time window
             run_data[run + "_" + str(month)] = data_by_month[month][1]
 
     return run_data
@@ -78,7 +78,7 @@ def create_training_samples(data_path, state_values):
                 state_tensor[:,ncol] = np.array(data[var][layer,:,:]).reshape(grid_points)
                 ncol += 1
 
-        state_tensors[run] = pd.DataFrame(state_tensor)
+        state_tensor_dict[run] = pd.DataFrame(state_tensor)
 
 
     return state_tensor_dict
@@ -111,7 +111,7 @@ def average_by_year(num_years, years_simmed, state_tensor_dict):
 def normalize_data(state_tensors):
     """Create normal distribution of data in each time averaged sample"""
     print("normalizing...")
-    for kh, run_at_kh in state_tensors.items():
+    for kh, runs_at_kh in state_tensors.items():
         for state_tensor in runs_at_kh:
             min_max_scaler = preprocessing.MinMaxScaler()
             np_scaled = min_max_scaler.fit_transform(state_tensor)
@@ -197,9 +197,10 @@ if __name__ == "__main__":
         # clock pre-processing time
         start_time = time.time()
 
-        training_samples = create_training_samples(data_path, state_values)
-        averaged_state_tensors = average_by_year(time_window, years_simmed, training_samples)
-        normalized_state_tensors = normalize_data(averaged_state_tensors)
+        state_tensor_dict = create_training_samples(data_path, state_values)
+        #averaged_state_tensors = average_by_year(time_window, years_simmed, state_tensor_dict)
+        binned_by_kh = bin_by_KH(state_tensor_dict)
+        normalized_state_tensors = normalize_data(binned_by_kh)
         write_datasets(normalized_state_tensors)
 
         print("--- %s minutes ---" % ((time.time() - start_time)/60))
