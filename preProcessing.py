@@ -57,7 +57,7 @@ def create_training_samples(data_path, state_values):
     run_data = collect_run_data(data_path)
 
     # get state tensors for each run to hold training data
-    state_tensors, data_info = shape_training_data(run_data, state_values)
+    state_tensor_dict, data_info = shape_training_data(run_data, state_values)
     layers = data_info[0]
     grid_points = data_info[1] * data_info[2]
 
@@ -68,7 +68,7 @@ def create_training_samples(data_path, state_values):
         run_data[run]["stream"] = data.vh.cumsum('xh')
 
     print("processing...")
-    for run, state_tensor in state_tensors.items():
+    for run, state_tensor in state_tensor_dict.items():
         # Loop over all state variables to create state tensor
         KH = run.split("_")[2]
         data = run_data[run]
@@ -81,19 +81,25 @@ def create_training_samples(data_path, state_values):
         state_tensors[run] = pd.DataFrame(state_tensor)
 
 
-    return state_tensors
+    return state_tensor_dict
 
 
-def average_by_year(num_years, years_simmed, training_samples):
-    """Takes in training samples to be averaged by num years of simulation
-       Returns a dictionary of KH : [samples_averaged_by_year]"""
-    KH = set([x.split("_")[2] for x in training_samples.keys()])
+def bin_by_KH(state_tensor_dict):
+    """returns a dict of training samples with key as KH value from run"""
+    KH = set([x.split("_")[2] for x in state_tensor_dict.keys()])
     unaveraged = dict.fromkeys(KH, [])
-    avg_samples = dict.fromkeys(KH, [])
-    for name, sample in training_samples.items():
-        vis = name.split("_")[2]
-        unaveraged[vis].append(sample)
+    for run_name, st in state_tensor_dict.items():
+        vis = run_name.split("_")[2]
+        unaveraged[vis].append(st)
 
+    return unaveraged
+
+
+def average_by_year(num_years, years_simmed, state_tensor_dict):
+    """Takes in dict of state_tensors to be averaged by num years of simulation
+       Returns a dictionary of KH : [samples_averaged_by_year]"""
+    avg_samples = {}
+    unaveraged = bin_by_KH(state_tensor_dict)
     print("averaging...")
     for kh, sl in unaveraged.items():
         avg_samples[kh] = [pd.concat((sl[x:x+num_years*12])).groupby(level=0).mean()
@@ -105,8 +111,8 @@ def average_by_year(num_years, years_simmed, training_samples):
 def normalize_data(state_tensors):
     """Create normal distribution of data in each time averaged sample"""
     print("normalizing...")
-    for run, sample_list in state_tensors.items():
-        for state_tensor in sample_list:
+    for kh, run_at_kh in state_tensors.items():
+        for state_tensor in runs_at_kh:
             min_max_scaler = preprocessing.MinMaxScaler()
             np_scaled = min_max_scaler.fit_transform(state_tensor)
             state_tensor = pd.DataFrame(np_scaled)
